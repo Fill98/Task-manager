@@ -26,9 +26,9 @@ public class UserService {
         return new UserDto(user.getId(), user.getUsername());
     }
 
-
-    //TODO DELETE user
-
+    public void deleteUser(long id){
+        userRepository.deleteById(id);
+    }
 
 
     //TODO modify user
