@@ -29,11 +29,13 @@ public class UserService {
     public void deleteUser(long id){
         userRepository.deleteById(id);
     }
-
-
     //TODO modify user
 
 
+    public UserDto findUserByUsername(String username){
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(()-> new RuntimeException("User not found."));
 
-    //TODO find user
+        return new UserDto(user.getId(),user.getUsername());
+    }
 }

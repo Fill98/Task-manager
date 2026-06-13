@@ -4,25 +4,22 @@ import com.example.taskmaneger.dto.CreateUserDto;
 import com.example.taskmaneger.dto.UserDto;
 import com.example.taskmaneger.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-public class UserControler {
+public class UserController {
 
     @Autowired
     UserService userService;
 
-    //TODO createUser
+
     @PostMapping("/api/user")
     public UserDto createUser(@RequestBody CreateUserDto createUserDto){
         return userService.createUser(createUserDto);
     }
 
-    @DeleteMapping("/api/user")
-    public void deleteUser(long id){
+    @DeleteMapping("/api/user/{id}")
+    public void deleteUser(@PathVariable long id){
         userService.deleteUser(id);
     }
 
@@ -30,6 +27,8 @@ public class UserControler {
 
 
 
-    //TODO findUSer
-
+    @GetMapping("/api/user/{username}")
+    public UserDto findUserByUsername(@PathVariable String username){
+        return userService.findUserByUsername(username);
+    }
 }
