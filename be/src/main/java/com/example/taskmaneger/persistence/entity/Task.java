@@ -25,6 +25,10 @@ public class Task {
     private User user;
 
     @ManyToOne
+    @JoinColumn(name = "assigned_by_id")
+    private User assignedBy;
+
+    @ManyToOne
     @JoinColumn(name = "household_id")
     private Household household;
 
