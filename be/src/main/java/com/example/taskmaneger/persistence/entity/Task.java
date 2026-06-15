@@ -24,6 +24,10 @@ public class Task {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @ManyToOne
+    @JoinColumn(name = "household_id")
+    private Household household;
+
     private String taskName;
     private String description;
 
