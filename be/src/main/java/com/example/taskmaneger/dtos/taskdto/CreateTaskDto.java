@@ -1,4 +1,11 @@
 package com.example.taskmaneger.dtos.taskdto;
 
-public record CreateTaskDto(String taskName, String description, Long userId, Long assignedById) {
+
+
+import com.example.taskmaneger.persistence.entity.Priority;
+
+import java.time.LocalDateTime;
+
+public record CreateTaskDto(String taskName, String description, Long userId, Long assignedById, LocalDateTime mustBeDone, Priority priority) {
+
 }
