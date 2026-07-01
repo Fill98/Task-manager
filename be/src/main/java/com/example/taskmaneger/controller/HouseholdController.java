@@ -26,4 +26,10 @@ public class HouseholdController {
         return householdService.findHouseholdById(householdId);
     }
 
+    //pridanie clena domacnosti
+    @PostMapping("/api/household/{householdId}/members/{userId}")
+    public HouseholdDto addMember(@PathVariable("householdId") Long householdId, @PathVariable("userId") Long userId) {
+        return householdService.addMember(householdId, userId);
+    }
+
 }
