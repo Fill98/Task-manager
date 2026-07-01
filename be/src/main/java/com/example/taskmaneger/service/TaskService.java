@@ -45,7 +45,13 @@ public class TaskService {
         return toDto(saved);
     }
 
-    //todo markAsCompletedTask
+
+    public void changeStatus(Long id, Status status){
+        Task task = taskRepository.findById(id)
+                .orElseThrow(()-> new RuntimeException("Task not found"));
+        task.setStatus(status);
+        taskRepository.save(task);
+    }
 
 
     public void deleteTask(Long id){
@@ -65,7 +71,6 @@ public class TaskService {
         task.setUser(user);
         task.setMustBeDone(newTask.mustBeDone());
         task.setPriority(newTask.priority());
-        task.setStatus(newTask.status());
 
         Task saved = taskRepository.save(task);
 
