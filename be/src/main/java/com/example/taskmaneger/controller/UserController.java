@@ -23,10 +23,6 @@ public class UserController {
         userService.deleteUser(id);
     }
 
-    //TODO modifyUser
-
-
-
     @GetMapping("/api/user/{username}")
     public UserDto findUserByUsername(@PathVariable String username){
         return userService.findUserByUsername(username);

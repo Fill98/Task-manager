@@ -42,16 +42,7 @@ public class TaskService {
 
         Task saved = taskRepository.save(task);
 
-        return new TaskDto(
-                saved.getId(),
-                saved.getTaskName(),
-                saved.getDescription(),
-                saved.getUser().getUsername(),
-                saved.getAssignedBy().getUsername(),
-                saved.getMustBeDone(),
-                saved.getPriority(),
-                saved.getStatus()
-        );
+        return toDto(saved);
     }
 
     //todo markAsCompletedTask
@@ -78,16 +69,7 @@ public class TaskService {
 
         Task saved = taskRepository.save(task);
 
-        return new TaskDto(
-                saved.getId(),
-                saved.getTaskName(),
-                saved.getDescription(),
-                saved.getUser().getUsername(),
-                saved.getAssignedBy().getUsername(),
-                saved.getMustBeDone(),
-                saved.getPriority(),
-                saved.getStatus()
-        );
+        return toDto(saved);
 
     }
 
@@ -98,16 +80,8 @@ public class TaskService {
         List<TaskDto>taskDtos = new LinkedList<>();
 
         for(Task task : tasks){
-            taskDtos.add(new TaskDto(
-                    task.getId(),
-                    task.getTaskName(),
-                    task.getDescription(),
-                    task.getUser().getUsername(),
-                    task.getAssignedBy().getUsername(),
-                    task.getMustBeDone(),
-                    task.getPriority(),
-                    task.getStatus()
-            ));
+            taskDtos.add(toDto(task)
+            );
         }
         return taskDtos;
     }
@@ -120,21 +94,26 @@ public class TaskService {
         List<Task>tasks = user.getTaskList();
 
         for(Task task : tasks){
-            taskDtos.add(new TaskDto(
-                    task.getId(),
-                    task.getTaskName(),
-                    task.getDescription(),
-                    task.getUser().getUsername(),
-                    task.getAssignedBy().getUsername(),
-                    task.getMustBeDone(),
-                    task.getPriority(),
-                    task.getStatus()
-            ));
-
+            taskDtos.add(toDto(task));
         }
         return taskDtos;
 
 
+    }
+
+
+    //return new TaskDto
+    private TaskDto toDto(Task task){
+        return new TaskDto(
+                task.getId(),
+                task.getTaskName(),
+                task.getDescription(),
+                task.getUser().getUsername(),
+                task.getAssignedBy().getUsername(),
+                task.getMustBeDone(),
+                task.getPriority(),
+                task.getStatus()
+        );
     }
 
 }
