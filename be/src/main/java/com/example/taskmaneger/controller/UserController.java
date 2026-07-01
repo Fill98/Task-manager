@@ -1,7 +1,7 @@
 package com.example.taskmaneger.controller;
 
-import com.example.taskmaneger.dto.CreateUserDto;
-import com.example.taskmaneger.dto.UserDto;
+import com.example.taskmaneger.dtos.userdto.CreateUserDto;
+import com.example.taskmaneger.dtos.userdto.UserDto;
 import com.example.taskmaneger.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

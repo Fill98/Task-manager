@@ -1,7 +1,7 @@
 package com.example.taskmaneger.service;
 
-import com.example.taskmaneger.dto.CreateUserDto;
-import com.example.taskmaneger.dto.UserDto;
+import com.example.taskmaneger.dtos.userdto.CreateUserDto;
+import com.example.taskmaneger.dtos.userdto.UserDto;
 import com.example.taskmaneger.persistence.entity.User;
 import com.example.taskmaneger.persistence.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

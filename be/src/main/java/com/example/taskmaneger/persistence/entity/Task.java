@@ -24,6 +24,14 @@ public class Task {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @ManyToOne
+    @JoinColumn(name = "assigned_by_id")
+    private User assignedBy;
+
+    @ManyToOne
+    @JoinColumn(name = "household_id")
+    private Household household;
+
     private String taskName;
     private String description;
 
