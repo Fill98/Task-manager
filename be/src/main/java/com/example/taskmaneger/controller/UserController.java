@@ -27,4 +27,10 @@ public class UserController {
     public UserDto findUserByUsername(@PathVariable String username){
         return userService.findUserByUsername(username);
     }
+    //vstup a vystup FE/BE na najdenie usera podla id
+    @GetMapping("/api/user/id/{id}")
+    public UserDto findUserById(@PathVariable long id){
+        return userService.findUserById(id);
+    }
+
 }
