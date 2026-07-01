@@ -1,6 +1,7 @@
 package com.example.taskmaneger.controller;
 
 import com.example.taskmaneger.dtos.taskdto.CreateTaskDto;
+import com.example.taskmaneger.dtos.taskdto.ModifyTaskDto;
 import com.example.taskmaneger.dtos.taskdto.TaskDto;
 import com.example.taskmaneger.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +21,8 @@ public class TaskController {
     }
 
     @PutMapping("/api/task/{id}")
-    public TaskDto modifyTask(@PathVariable Long id, @RequestBody CreateTaskDto createTaskDto){
-        return taskService.modifyTask(id,createTaskDto);
+    public TaskDto modifyTask(@PathVariable Long id, @RequestBody ModifyTaskDto modifyTaskDto){
+        return taskService.modifyTask(id,modifyTaskDto);
     }
 
     @DeleteMapping("/api/task/{id}")
@@ -32,5 +33,10 @@ public class TaskController {
     @GetMapping("/api/task")
     public List<TaskDto> findAllTasks(){
         return taskService.findAllTaskList();
+    }
+
+    @GetMapping("/api/task/{username}")
+    public List<TaskDto> findUserTasks(@PathVariable String username){
+        return taskService.findUserTasks(username);
     }
 }
