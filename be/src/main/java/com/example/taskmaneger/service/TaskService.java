@@ -42,19 +42,16 @@ public class TaskService {
 
         Task saved = taskRepository.save(task);
 
-        return new TaskDto(
-                saved.getId(),
-                saved.getTaskName(),
-                saved.getDescription(),
-                saved.getUser().getUsername(),
-                saved.getAssignedBy().getUsername(),
-                saved.getMustBeDone(),
-                saved.getPriority(),
-                saved.getStatus()
-        );
+        return toDto(saved);
     }
 
-    //todo markAsCompletedTask
+
+    public void changeStatus(Long id, Status status){
+        Task task = taskRepository.findById(id)
+                .orElseThrow(()-> new RuntimeException("Task not found"));
+        task.setStatus(status);
+        taskRepository.save(task);
+    }
 
 
     public void deleteTask(Long id){
@@ -74,20 +71,10 @@ public class TaskService {
         task.setUser(user);
         task.setMustBeDone(newTask.mustBeDone());
         task.setPriority(newTask.priority());
-        task.setStatus(newTask.status());
 
         Task saved = taskRepository.save(task);
 
-        return new TaskDto(
-                saved.getId(),
-                saved.getTaskName(),
-                saved.getDescription(),
-                saved.getUser().getUsername(),
-                saved.getAssignedBy().getUsername(),
-                saved.getMustBeDone(),
-                saved.getPriority(),
-                saved.getStatus()
-        );
+        return toDto(saved);
 
     }
 
@@ -98,16 +85,8 @@ public class TaskService {
         List<TaskDto>taskDtos = new LinkedList<>();
 
         for(Task task : tasks){
-            taskDtos.add(new TaskDto(
-                    task.getId(),
-                    task.getTaskName(),
-                    task.getDescription(),
-                    task.getUser().getUsername(),
-                    task.getAssignedBy().getUsername(),
-                    task.getMustBeDone(),
-                    task.getPriority(),
-                    task.getStatus()
-            ));
+            taskDtos.add(toDto(task)
+            );
         }
         return taskDtos;
     }
@@ -120,21 +99,26 @@ public class TaskService {
         List<Task>tasks = user.getTaskList();
 
         for(Task task : tasks){
-            taskDtos.add(new TaskDto(
-                    task.getId(),
-                    task.getTaskName(),
-                    task.getDescription(),
-                    task.getUser().getUsername(),
-                    task.getAssignedBy().getUsername(),
-                    task.getMustBeDone(),
-                    task.getPriority(),
-                    task.getStatus()
-            ));
-
+            taskDtos.add(toDto(task));
         }
         return taskDtos;
 
 
+    }
+
+
+    //return new TaskDto
+    private TaskDto toDto(Task task){
+        return new TaskDto(
+                task.getId(),
+                task.getTaskName(),
+                task.getDescription(),
+                task.getUser().getUsername(),
+                task.getAssignedBy().getUsername(),
+                task.getMustBeDone(),
+                task.getPriority(),
+                task.getStatus()
+        );
     }
 
 }

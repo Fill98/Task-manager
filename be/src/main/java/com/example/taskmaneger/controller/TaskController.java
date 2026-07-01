@@ -3,6 +3,7 @@ package com.example.taskmaneger.controller;
 import com.example.taskmaneger.dtos.taskdto.CreateTaskDto;
 import com.example.taskmaneger.dtos.taskdto.ModifyTaskDto;
 import com.example.taskmaneger.dtos.taskdto.TaskDto;
+import com.example.taskmaneger.persistence.entity.Status;
 import com.example.taskmaneger.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +24,11 @@ public class TaskController {
     @PutMapping("/api/task/{id}")
     public TaskDto modifyTask(@PathVariable Long id, @RequestBody ModifyTaskDto modifyTaskDto){
         return taskService.modifyTask(id,modifyTaskDto);
+    }
+
+    @PatchMapping("/api/task/{id}/{status}")
+    public void changeStatus(@PathVariable Long id, @PathVariable Status status){
+        taskService.changeStatus(id,status);
     }
 
     @DeleteMapping("/api/task/{id}")
