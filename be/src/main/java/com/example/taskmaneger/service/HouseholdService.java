@@ -30,6 +30,14 @@ public class HouseholdService {
 
         return new HouseholdDto(household.getId(), owner.getId(), household.getName());
     }
+    //metoda na najdednie domacnosti podla id
+    public HouseholdDto findHouseholdById(Long householdId){
+        Household household = householdRepository.findById(householdId)
+                .orElseThrow(() -> new RuntimeException("household not found"));
+
+        return new HouseholdDto(household.getId(), household.getOwner().getId(), household.getName());
+
+    }
 
 
 
