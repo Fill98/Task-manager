@@ -38,4 +38,11 @@ public class UserService {
 
         return new UserDto(user.getId(),user.getUsername());
     }
+    //metoda na najdenie usera podla id
+    public UserDto findUserById(long id){
+        User user = userRepository.findById(id)
+                .orElseThrow(()-> new RuntimeException("User by user Id not found."));
+
+        return new UserDto(user.getId(),user.getUsername());
+    }
 }
