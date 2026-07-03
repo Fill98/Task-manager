@@ -20,7 +20,7 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Task> taskList;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String username;
 
     private String password;
