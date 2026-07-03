@@ -2,6 +2,7 @@ package com.example.taskmaneger.service;
 
 import com.example.taskmaneger.dtos.userdto.CreateUserDto;
 import com.example.taskmaneger.dtos.userdto.UserDto;
+import com.example.taskmaneger.exception.NotFoundException;
 import com.example.taskmaneger.persistence.entity.User;
 import com.example.taskmaneger.persistence.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,14 +35,14 @@ public class UserService {
 
     public UserDto findUserByUsername(String username){
         User user = userRepository.findByUsername(username)
-                .orElseThrow(()-> new RuntimeException("User not found."));
+                .orElseThrow(()-> new NotFoundException("User not found."));
 
         return new UserDto(user.getId(),user.getUsername());
     }
     //metoda na najdenie usera podla id
     public UserDto findUserById(long id){
         User user = userRepository.findById(id)
-                .orElseThrow(()-> new RuntimeException("User by user Id not found."));
+                .orElseThrow(()-> new NotFoundException("User not found."));
 
         return new UserDto(user.getId(),user.getUsername());
     }
