@@ -2,6 +2,8 @@ package com.example.taskmaneger.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,9 +16,11 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http)throws Exception{
         http
                 .csrf(csrf -> csrf.disable())
+                .httpBasic(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.POST,"/api/user").permitAll()
                         //povolileny aj som error inak vrati 403 miesto 400/404 pritestovani
-                        .requestMatchers("/api/**","/error").permitAll()
+                        .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated());
         return http.build();
     }
