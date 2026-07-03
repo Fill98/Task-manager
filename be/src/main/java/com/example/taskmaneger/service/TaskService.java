@@ -4,9 +4,11 @@ import com.example.taskmaneger.dtos.taskdto.CreateTaskDto;
 import com.example.taskmaneger.dtos.taskdto.ModifyTaskDto;
 import com.example.taskmaneger.dtos.taskdto.TaskDto;
 import com.example.taskmaneger.exception.NotFoundException;
+import com.example.taskmaneger.persistence.entity.Household;
 import com.example.taskmaneger.persistence.entity.Status;
 import com.example.taskmaneger.persistence.entity.Task;
 import com.example.taskmaneger.persistence.entity.User;
+import com.example.taskmaneger.persistence.repository.HouseholdRepository;
 import com.example.taskmaneger.persistence.repository.TaskRepository;
 import com.example.taskmaneger.persistence.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,17 +26,24 @@ public class TaskService {
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    private HouseholdRepository householdRepository;
+
 
     public TaskDto createTask(CreateTaskDto createTaskDto){
         User user = userRepository.findById(createTaskDto.userId())
                 .orElseThrow(() -> new NotFoundException("User not found."));
         User assignedBy = userRepository.findById(createTaskDto.assignedById())
                 .orElseThrow(() -> new NotFoundException("Assigned user not found"));
+                //pridanie tasku k domacnosti
+                Household household = householdRepository.findById(createTaskDto.householdId())
+                        .orElseThrow(() -> new NotFoundException("Household not found."));
 
         Task task = new Task();
         task.setTaskName(createTaskDto.taskName());
         task.setDescription(createTaskDto.description());
         task.setUser(user);
+        task.setHousehold(household);
         task.setAssignedBy(assignedBy);
         task.setMustBeDone(createTaskDto.mustBeDone());
         task.setPriority(createTaskDto.priority());
@@ -108,6 +117,17 @@ public class TaskService {
         return taskDtos;
 
 
+    }
+
+    //metoda vracia ulohy domacnosti podla id
+    public List<TaskDto>findHouseholdTasks(Long householdId){
+        List<Task> tasks = taskRepository.findByHouseholdId(householdId);
+        List<TaskDto> taskDtos = new LinkedList<>();
+
+        for (Task task : tasks){
+            taskDtos.add(toDto(task));
+        }
+        return taskDtos;
     }
 
 
