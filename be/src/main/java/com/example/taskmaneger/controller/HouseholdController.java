@@ -33,4 +33,11 @@ public class HouseholdController {
         return householdService.addMember(householdId, userId);
     }
 
+    //odstranenie clena domacnosti(userom samim alebo ownerom)
+    //TODO: treba dorobit overenie opravnenia mazat
+    @DeleteMapping("/api/household/{householdId}/members/{userId}")
+    public void  removeMember(@PathVariable("householdId") Long householdId, @PathVariable("userId") Long userId){
+        householdService.removeMember(householdId, userId);
+    }
+
 }

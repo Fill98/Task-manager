@@ -50,6 +50,11 @@ public class HouseholdService {
                 .orElseThrow(() -> new RuntimeException("household not found"));
         User newMember = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("user not found"));
+
+        //overenie ci user uz neni clen uz inej domacnosti
+        if (householdRepository.existsByMembers_Id(userId)){
+            throw new RuntimeException("user is already a member of a household");
+        }
         //overenie ci zoznam existuje ak nie vytvor novy
         if (household.getMembers() == null){
             household.setMembers(new ArrayList<>());
@@ -59,6 +64,16 @@ public class HouseholdService {
         householdRepository.save(household);
 
         return new HouseholdDto(household.getId(),household.getOwner().getId(),  household.getName());
+    }
+
+
+    //metoda na odstranenie clena domacnosti(userom samim alebo ownerom domacnosti)
+    //TODO: treba doprogramovat overenie prihlaseneho usera
+    public void removeMember(Long householdId, Long userId){
+        Household household = householdRepository.findById(householdId)
+                .orElseThrow(() -> new RuntimeException("household not found"));
+        household.getMembers().removeIf(member -> member.getId().equals(userId));
+        householdRepository.save(household);
     }
 
 
