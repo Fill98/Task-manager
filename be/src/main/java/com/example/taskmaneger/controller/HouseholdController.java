@@ -3,6 +3,7 @@ package com.example.taskmaneger.controller;
 import com.example.taskmaneger.dtos.householddto.CreateHouseholdDto;
 import com.example.taskmaneger.dtos.householddto.HouseholdDto;
 import com.example.taskmaneger.service.HouseholdService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +18,7 @@ public class HouseholdController {
 
     //metoda na tvorbu domacnosti
     @PostMapping("/api/household")
-    public HouseholdDto createHousehold(@RequestBody CreateHouseholdDto createHouseholdDto) {
+    public HouseholdDto createHousehold(@Valid @RequestBody CreateHouseholdDto createHouseholdDto) {
         return householdService.createHousehold(createHouseholdDto);
     }
     //vrati domacnost podla id

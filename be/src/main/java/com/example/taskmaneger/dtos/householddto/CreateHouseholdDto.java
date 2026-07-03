@@ -1,4 +1,6 @@
 package com.example.taskmaneger.dtos.householddto;
 
-public record CreateHouseholdDto (String name, Long ownerId){
+import jakarta.validation.constraints.NotBlank;
+
+public record CreateHouseholdDto (@NotBlank(message = "House hold name must not by empty") String name, Long ownerId){
 }
