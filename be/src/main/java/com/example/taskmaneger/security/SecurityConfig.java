@@ -15,7 +15,8 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/**").permitAll()
+                        //povolileny aj som error inak vrati 403 miesto 400/404 pritestovani
+                        .requestMatchers("/api/**","/error").permitAll()
                         .anyRequest().authenticated());
         return http.build();
     }

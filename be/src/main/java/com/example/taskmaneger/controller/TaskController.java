@@ -45,4 +45,10 @@ public class TaskController {
     public List<TaskDto> findUserTasks(@PathVariable String username){
         return taskService.findUserTasks(username);
     }
+
+    //metoda vracia ulohy domacnosti podla id
+    @GetMapping("/api/task/household/{householdId}")
+    public List<TaskDto> findHouseholdTasks(@PathVariable Long householdId){
+        return taskService.findHouseholdTasks(householdId);
+    }
 }
