@@ -3,6 +3,7 @@ package com.example.taskmaneger.service;
 import com.example.taskmaneger.dtos.taskdto.CreateTaskDto;
 import com.example.taskmaneger.dtos.taskdto.ModifyTaskDto;
 import com.example.taskmaneger.dtos.taskdto.TaskDto;
+import com.example.taskmaneger.exception.NotFoundException;
 import com.example.taskmaneger.persistence.entity.Household;
 import com.example.taskmaneger.persistence.entity.Status;
 import com.example.taskmaneger.persistence.entity.Task;
@@ -31,13 +32,12 @@ public class TaskService {
 
     public TaskDto createTask(CreateTaskDto createTaskDto){
         User user = userRepository.findById(createTaskDto.userId())
-                .orElseThrow(() -> new RuntimeException("User not found."));
-
+                .orElseThrow(() -> new NotFoundException("User not found."));
         User assignedBy = userRepository.findById(createTaskDto.assignedById())
-                .orElseThrow(() -> new RuntimeException("Assigned user not found"));
-        //pridanie tasku k domacnosti
-        Household household = householdRepository.findById(createTaskDto.householdId())
-                .orElseThrow(() -> new RuntimeException("Household not found."));
+                .orElseThrow(() -> new NotFoundException("Assigned user not found"));
+                //pridanie tasku k domacnosti
+                Household household = householdRepository.findById(createTaskDto.householdId())
+                        .orElseThrow(() -> new NotFoundException("Household not found."));
 
         Task task = new Task();
         task.setTaskName(createTaskDto.taskName());
@@ -57,13 +57,17 @@ public class TaskService {
 
     public void changeStatus(Long id, Status status){
         Task task = taskRepository.findById(id)
-                .orElseThrow(()-> new RuntimeException("Task not found"));
+                .orElseThrow(()-> new NotFoundException("Task not found"));
         task.setStatus(status);
         taskRepository.save(task);
     }
 
 
     public void deleteTask(Long id){
+
+        Task task = taskRepository.findById(id).
+                orElseThrow(()-> new NotFoundException("This task doesn't exist."));
+
         taskRepository.deleteById(id);
     }
 
@@ -71,10 +75,10 @@ public class TaskService {
     public TaskDto modifyTask(Long id, ModifyTaskDto newTask){
 
         User user = userRepository.findById(newTask.assignedTo())
-                .orElseThrow(()->new RuntimeException("user not found."));
+                .orElseThrow(()->new NotFoundException("user not found."));
 
         Task task = taskRepository.findById(id)
-                .orElseThrow(()-> new RuntimeException("Task not found"));
+                .orElseThrow(()-> new NotFoundException("Task not found"));
         task.setTaskName(newTask.taskName());
         task.setDescription(newTask.description());
         task.setUser(user);
@@ -102,7 +106,7 @@ public class TaskService {
 
     public List<TaskDto>findUserTasks(String username){
         User user = userRepository.findByUsername(username)
-                .orElseThrow(()-> new RuntimeException("User not found."));
+                .orElseThrow(()-> new NotFoundException("User not found."));
         List<TaskDto> taskDtos = new LinkedList<>();
 
         List<Task>tasks = user.getTaskList();
