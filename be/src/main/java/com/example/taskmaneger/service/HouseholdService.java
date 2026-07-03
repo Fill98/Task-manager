@@ -28,6 +28,10 @@ public class HouseholdService {
                 userRepository.findById(createHouseholdDto.ownerId())
                 .orElseThrow(() -> new RuntimeException("owner household not found"));
         household.setOwner(owner);
+        //vytvreme prazny list clenov domacnosti
+        household.setMembers(new ArrayList<>());
+        //pridame ownera ako clena
+        household.getMembers().add(owner);
         householdRepository.save(household);
 
         return new HouseholdDto(household.getId(), owner.getId(), household.getName());
