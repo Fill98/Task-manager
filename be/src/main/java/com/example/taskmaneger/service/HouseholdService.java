@@ -27,6 +27,12 @@ public class HouseholdService {
         User owner =
                 userRepository.findById(createHouseholdDto.ownerId())
                 .orElseThrow(() -> new RuntimeException("owner household not found"));
+
+        //overenie ci user uz neni clenom/ownerom inej domacnosti
+        if (householdRepository.existsByMembers_Id(owner.getId())){
+            throw new RuntimeException("user is already a member of a household");
+        }
+
         household.setOwner(owner);
         //vytvreme prazdny list clenov domacnosti
         household.setMembers(new ArrayList<>());
