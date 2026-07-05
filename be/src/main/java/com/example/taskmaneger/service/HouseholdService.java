@@ -2,6 +2,8 @@ package com.example.taskmaneger.service;
 
 import com.example.taskmaneger.dtos.householddto.CreateHouseholdDto;
 import com.example.taskmaneger.dtos.householddto.HouseholdDto;
+import com.example.taskmaneger.exception.ConflictException;
+import com.example.taskmaneger.exception.NotFoundException;
 import com.example.taskmaneger.persistence.entity.Household;
 import com.example.taskmaneger.persistence.entity.User;
 import com.example.taskmaneger.persistence.repository.HouseholdRepository;
@@ -26,15 +28,15 @@ public class HouseholdService {
 
         User owner =
                 userRepository.findById(createHouseholdDto.ownerId())
-                .orElseThrow(() -> new RuntimeException("owner household not found"));
+                .orElseThrow(() -> new NotFoundException("Owner not found."));
 
         //overenie ci user uz neni clenom/ownerom inej domacnosti
         if (householdRepository.existsByMembers_Id(owner.getId())){
-            throw new RuntimeException("user is already a member of a household");
+            throw new ConflictException("User is already a member of a household.");
         }
 
         household.setOwner(owner);
-        //vytvreme prazdny list clenov domacnosti
+        //vytvarame prazdny list clenov domacnosti
         household.setMembers(new ArrayList<>());
         //pridame ownera ako clena
         household.getMembers().add(owner);
@@ -45,7 +47,7 @@ public class HouseholdService {
     //metoda na najdenie domacnosti podla id
     public HouseholdDto findHouseholdById(Long householdId){
         Household household = householdRepository.findById(householdId)
-                .orElseThrow(() -> new RuntimeException("household not found"));
+                .orElseThrow(() -> new NotFoundException("Household not found."));
 
         return new HouseholdDto(household.getId(), household.getOwner().getId(), household.getName());
 
@@ -53,13 +55,13 @@ public class HouseholdService {
     //pridanie clena domacnosti
     public HouseholdDto addMember(Long householdId, Long userId){
         Household household = householdRepository.findById(householdId)
-                .orElseThrow(() -> new RuntimeException("household not found"));
+                .orElseThrow(() -> new NotFoundException("Household not found."));
         User newMember = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("user not found"));
+                .orElseThrow(() -> new NotFoundException("User not found."));
 
         //overenie ci user uz neni clen uz inej domacnosti
         if (householdRepository.existsByMembers_Id(userId)){
-            throw new RuntimeException("user is already a member of a household");
+            throw new ConflictException("User is already a member of a household.");
         }
         //overenie ci zoznam existuje ak nie vytvor novy
         if (household.getMembers() == null){
@@ -77,7 +79,7 @@ public class HouseholdService {
     //TODO: treba doprogramovat overenie prihlaseneho usera
     public void removeMember(Long householdId, Long userId){
         Household household = householdRepository.findById(householdId)
-                .orElseThrow(() -> new RuntimeException("household not found"));
+                .orElseThrow(() -> new NotFoundException("Household not found."));
         household.getMembers().removeIf(member -> member.getId().equals(userId));
         householdRepository.save(household);
     }

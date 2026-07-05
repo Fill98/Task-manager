@@ -9,9 +9,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler{
 
     @ExceptionHandler(NotFoundException.class) //class volame lebo reprezentuje objekt,
-    // ukazuje ze no usages, ale pozuiva sa riesi to Spring kvoli tej anotacie
+    // ukazuje ze no usages, ale pouziva sa riesi to Spring kvoli tej anotacie
     public ResponseEntity<String> handleNotFound(NotFoundException exception){
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception.getMessage());  //nastavime status na 404, a spravu z vynimky
     }
 
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<String> handleConflict(ConflictException exception){
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(exception.getMessage());
+    }
 }
