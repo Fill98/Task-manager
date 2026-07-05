@@ -107,40 +107,18 @@ public class TaskService {
 
 
     public List<TaskDto>findAllTaskList(){
-        Iterable<Task> tasks = taskRepository.findAll();
-        List<TaskDto>taskDtos = new LinkedList<>();
-
-        for(Task task : tasks){
-            taskDtos.add(toDto(task)
-            );
-        }
-        return taskDtos;
+        return toDtoList(taskRepository.findAll());
     }
 
     public List<TaskDto>findUserTasks(String username){
         User user = userRepository.findByUsername(username)
                 .orElseThrow(()-> new NotFoundException("User not found."));
-        List<TaskDto> taskDtos = new LinkedList<>();
-
-        List<Task>tasks = user.getTaskList();
-
-        for(Task task : tasks){
-            taskDtos.add(toDto(task));
-        }
-        return taskDtos;
-
-
+        return toDtoList(user.getTaskList());
     }
 
     //metoda vracia ulohy domacnosti podla id
     public List<TaskDto>findHouseholdTasks(Long householdId){
-        List<Task> tasks = taskRepository.findByHouseholdId(householdId);
-        List<TaskDto> taskDtos = new LinkedList<>();
-
-        for (Task task : tasks){
-            taskDtos.add(toDto(task));
-        }
-        return taskDtos;
+        return toDtoList(taskRepository.findByHouseholdId(householdId));
     }
 
 /*
