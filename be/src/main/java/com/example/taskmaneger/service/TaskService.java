@@ -14,6 +14,7 @@ import com.example.taskmaneger.persistence.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -97,7 +98,11 @@ public class TaskService {
 
 
     public List<TaskDto> findAllSortedByPriority(){
-        return toDtoList(taskRepository.findAllByOrderByPriorityAsc());
+        List<TaskDto> taskDtos = toDtoList(taskRepository.findAll());
+        taskDtos.sort(Comparator.comparing(TaskDto::priority).reversed());  // List vieme sortovat, Comparatorovi povieme co chceme sortovat
+                                                                            // TaskDto::priority -> toto je cesta k tomu co sortovat [to iste ako getPriority] a
+                                                                            //reversed ze od najvacsieho po najmensi
+        return taskDtos;
     }
 
     public List<TaskDto> findByStatus(Status status){
