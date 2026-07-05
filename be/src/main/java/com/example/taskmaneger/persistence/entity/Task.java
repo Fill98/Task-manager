@@ -35,7 +35,7 @@ public class Task {
     private String taskName;
     private String description;
 
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     private Priority priority;
 
     @Enumerated(EnumType.STRING)
