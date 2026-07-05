@@ -90,7 +90,39 @@ public class TaskService {
         return toDto(saved);
 
     }
+    //TODO zoradenie podla terminu
+    public List<TaskDto> findAllSortedByDeadLine(){
+        Iterable<Task> tasks = taskRepository.findAllByOrderByMustBeDoneAsc();
+        List<TaskDto> taskDtos = new LinkedList<>();
 
+        for(Task task : tasks){
+            taskDtos.add(toDto(task));
+        }
+        return taskDtos;
+    }
+
+    //TODO zoradenie podla priority
+
+    public List<TaskDto> findBySortedByPriority(){
+        Iterable<Task> tasks = taskRepository.findAllByOrderByPriorityAsc();
+        List<TaskDto> taskDtos = new LinkedList<>();
+
+        for(Task task : tasks){
+            taskDtos.add(toDto(task));
+        }
+        return taskDtos;
+    }
+
+    //TODO filtrovanie podla Statusu
+    public List<TaskDto> findByStatus(Status status){
+        Iterable<Task> tasks = taskRepository.findByStatus(status);
+        List<TaskDto> taskDtos = new LinkedList<>();
+
+        for(Task task : tasks){
+            taskDtos.add(toDto(task));
+        }
+        return taskDtos;
+    }
 
 
     public List<TaskDto>findAllTaskList(){
