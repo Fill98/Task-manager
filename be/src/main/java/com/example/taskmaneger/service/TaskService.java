@@ -90,17 +90,16 @@ public class TaskService {
         return toDto(saved);
 
     }
-    //TODO zoradenie podla terminu
+
     public List<TaskDto> findAllSortedByDeadLine() {
         return toDtoList(taskRepository.findAllByOrderByMustBeDoneAsc());
     }
-    //TODO zoradenie podla priority
 
-    public List<TaskDto> findAllBySortedByPriority(){
+
+    public List<TaskDto> findAllSortedByPriority(){
         return toDtoList(taskRepository.findAllByOrderByPriorityAsc());
     }
 
-    //TODO filtrovanie podla Statusu
     public List<TaskDto> findByStatus(Status status){
         return toDtoList(taskRepository.findByStatus(status));
     }
