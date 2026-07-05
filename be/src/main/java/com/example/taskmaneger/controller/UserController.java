@@ -3,6 +3,7 @@ package com.example.taskmaneger.controller;
 import com.example.taskmaneger.dtos.userdto.CreateUserDto;
 import com.example.taskmaneger.dtos.userdto.UserDto;
 import com.example.taskmaneger.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,7 +15,7 @@ public class UserController {
 
 
     @PostMapping("/api/user")
-    public UserDto createUser(@RequestBody CreateUserDto createUserDto){
+    public UserDto createUser(@Valid @RequestBody CreateUserDto createUserDto){
         return userService.createUser(createUserDto);
     }
 
