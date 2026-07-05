@@ -96,7 +96,7 @@ public class TaskService {
     }
     //TODO zoradenie podla priority
 
-    public List<TaskDto> findBySortedByPriority(){
+    public List<TaskDto> findAllBySortedByPriority(){
         return toDtoList(taskRepository.findAllByOrderByPriorityAsc());
     }
 
