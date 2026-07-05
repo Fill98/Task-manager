@@ -91,37 +91,18 @@ public class TaskService {
 
     }
     //TODO zoradenie podla terminu
-    public List<TaskDto> findAllSortedByDeadLine(){
-        Iterable<Task> tasks = taskRepository.findAllByOrderByMustBeDoneAsc();
-        List<TaskDto> taskDtos = new LinkedList<>();
-
-        for(Task task : tasks){
-            taskDtos.add(toDto(task));
-        }
-        return taskDtos;
+    public List<TaskDto> findAllSortedByDeadLine() {
+        return toDtoList(taskRepository.findAllByOrderByMustBeDoneAsc());
     }
-
     //TODO zoradenie podla priority
 
     public List<TaskDto> findBySortedByPriority(){
-        Iterable<Task> tasks = taskRepository.findAllByOrderByPriorityAsc();
-        List<TaskDto> taskDtos = new LinkedList<>();
-
-        for(Task task : tasks){
-            taskDtos.add(toDto(task));
-        }
-        return taskDtos;
+        return toDtoList(taskRepository.findAllByOrderByPriorityAsc());
     }
 
     //TODO filtrovanie podla Statusu
     public List<TaskDto> findByStatus(Status status){
-        Iterable<Task> tasks = taskRepository.findByStatus(status);
-        List<TaskDto> taskDtos = new LinkedList<>();
-
-        for(Task task : tasks){
-            taskDtos.add(toDto(task));
-        }
-        return taskDtos;
+        return toDtoList(taskRepository.findByStatus(status));
     }
 
 
@@ -162,7 +143,9 @@ public class TaskService {
         return taskDtos;
     }
 
-
+/*
+    POMOCNE METODY
+ */
     //return new TaskDto
     private TaskDto toDto(Task task){
         return new TaskDto(
@@ -175,6 +158,15 @@ public class TaskService {
                 task.getPriority(),
                 task.getStatus()
         );
+    }
+
+    private List<TaskDto> toDtoList(Iterable<Task> tasks){
+        List<TaskDto> taskDtos = new LinkedList<>();
+        for (Task task : tasks){
+            taskDtos.add(toDto(task)
+            );
+        }
+        return taskDtos;
     }
 
 }
