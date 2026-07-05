@@ -21,11 +21,13 @@ public class TaskController {
         return taskService.createTask(createTaskDto);
     }
 
+    //modifikovanie tasku
     @PutMapping("/api/task/{id}")
     public TaskDto modifyTask(@PathVariable Long id, @RequestBody ModifyTaskDto modifyTaskDto){
         return taskService.modifyTask(id,modifyTaskDto);
     }
 
+    //zmena statusu tasku
     @PatchMapping("/api/task/{id}/{status}")
     public void changeStatus(@PathVariable Long id, @PathVariable Status status){
         taskService.changeStatus(id,status);
@@ -36,9 +38,28 @@ public class TaskController {
         taskService.deleteTask(id);
     }
 
+    //najdi vsetky tasky
     @GetMapping("/api/task")
     public List<TaskDto> findAllTasks(){
         return taskService.findAllTaskList();
+    }
+
+    //zorad podla casu na dokoncenie
+    @GetMapping("/api/task/sort/deadline")
+    public List<TaskDto> findAllSortedByDeadLine(){
+        return taskService.findAllSortedByDeadLine();
+    }
+
+    //zorad podla priority
+    @GetMapping("/api/task/sort/priority")
+    public List<TaskDto> findAllSortedByPriority(){
+        return taskService.findAllSortedByPriority();
+    }
+
+    //filtruj podla statusu taski
+    @GetMapping("/api/task/filter/{status}")
+    public List<TaskDto> findByStatus(@PathVariable Status status){
+        return taskService.findByStatus(status);
     }
 
     @GetMapping("/api/task/{username}")
