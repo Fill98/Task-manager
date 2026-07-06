@@ -11,6 +11,6 @@ public interface TaskRepository extends CrudRepository<Task, Long> {
     List<Task> findByHouseholdId(Long householdId);
     //zoradenie podla teminu
     List<Task> findAllByOrderByMustBeDoneAsc();
-    //filtrovanie podla statusu
-    List<Task> findByStatus(Status status);
+    //filtrovanie podla statusu a sekundarne podla terminu
+    List<Task> findByStatusOrderByMustBeDoneAsc(Status status);
 }
