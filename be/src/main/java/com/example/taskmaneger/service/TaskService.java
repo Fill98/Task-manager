@@ -91,7 +91,7 @@ public class TaskService {
         return toDto(saved);
 
     }
-
+    //zoradenie podla terminu vzostupne
     public List<TaskDto> findAllSortedByDeadLine() {
         return toDtoList(taskRepository.findAllByOrderByMustBeDoneAsc());
     }
