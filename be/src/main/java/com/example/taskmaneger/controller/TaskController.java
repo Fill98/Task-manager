@@ -38,7 +38,7 @@ public class TaskController {
         taskService.deleteTask(id);
     }
 
-    //najdi vsetky tasky
+    //najdi vsetky tasky len na VYVOJ
     @GetMapping("/api/task")
     public List<TaskDto> findAllTasks(){
         return taskService.findAllTaskList();
@@ -62,9 +62,9 @@ public class TaskController {
         return taskService.findByStatus(status);
     }
 
-    @GetMapping("/api/task/{username}")
-    public List<TaskDto> findUserTasks(@PathVariable String username){
-        return taskService.findUserTasks(username);
+    @GetMapping("/api/task/mytasks")
+    public List<TaskDto> findUserTasks(){
+        return taskService.findUserTasks();
     }
 
     //metoda vracia ulohy domacnosti podla id

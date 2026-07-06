@@ -12,6 +12,7 @@ import com.example.taskmaneger.persistence.repository.HouseholdRepository;
 import com.example.taskmaneger.persistence.repository.TaskRepository;
 import com.example.taskmaneger.persistence.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -55,14 +56,12 @@ public class TaskService {
         return toDto(saved);
     }
 
-
     public void changeStatus(Long id, Status status){
         Task task = taskRepository.findById(id)
                 .orElseThrow(()-> new NotFoundException("Task not found"));
         task.setStatus(status);
         taskRepository.save(task);
     }
-
 
     public void deleteTask(Long id){
 
@@ -71,7 +70,6 @@ public class TaskService {
 
         taskRepository.deleteById(id);
     }
-
 
     public TaskDto modifyTask(Long id, ModifyTaskDto newTask){
 
@@ -91,14 +89,17 @@ public class TaskService {
         return toDto(saved);
 
     }
+
     //zoradenie podla terminu vzostupne
     public List<TaskDto> findAllSortedByDeadLine() {
-        return toDtoList(taskRepository.findAllByOrderByMustBeDoneAsc());
+        List<TaskDto> taskDtos = toDtoList(getCurrentUser().getTaskList());
+        taskDtos.sort(Comparator.comparing(TaskDto::mustBeDone,Comparator.nullsLast(Comparator.naturalOrder())));
+
+        return taskDtos;
     }
 
-
     public List<TaskDto> findAllSortedByPriority(){
-        List<TaskDto> taskDtos = toDtoList(taskRepository.findAll());
+        List<TaskDto> taskDtos = toDtoList(getCurrentUser().getTaskList());
         taskDtos.sort(Comparator.comparing(TaskDto::priority).reversed());  // List vieme sortovat, Comparatorovi povieme co chceme sortovat
                                                                             // TaskDto::priority -> toto je cesta k tomu co sortovat [to iste ako getPriority] a
                                                                             //reversed ze od najvacsieho po najmensi
@@ -106,17 +107,23 @@ public class TaskService {
     }
 
     public List<TaskDto> findByStatus(Status status){
-        return toDtoList(taskRepository.findByStatus(status));
-    }
+        List<Task> filteredTasks = getCurrentUser()
+                .getTaskList()
+                .stream() // pomocou stream sa daju retazit oepracie
+                .filter(task -> task.getStatus() == status)// vyberie tie tasky ktore splnaju podmienku
+                .sorted(Comparator.comparing(Task::getMustBeDone,
+                        Comparator.nullsLast(Comparator.naturalOrder())))
+                .toList(); // spravi naspat List<Task>
 
+        return toDtoList(filteredTasks);
+    }
 
     public List<TaskDto>findAllTaskList(){
         return toDtoList(taskRepository.findAll());
     }
 
-    public List<TaskDto>findUserTasks(String username){
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(()-> new NotFoundException("User not found."));
+    public List<TaskDto>findUserTasks(){
+        User user = getCurrentUser();
         return toDtoList(user.getTaskList());
     }
 
@@ -128,6 +135,7 @@ public class TaskService {
 /*
     POMOCNE METODY
  */
+
     //return new TaskDto
     private TaskDto toDto(Task task){
         return new TaskDto(
@@ -149,6 +157,14 @@ public class TaskService {
             );
         }
         return taskDtos;
+    }
+
+    private User getCurrentUser(){
+        String username = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new NotFoundException("User not found."));
     }
 
 }
