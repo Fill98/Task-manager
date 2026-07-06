@@ -14,6 +14,7 @@ import com.example.taskmaneger.persistence.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -90,47 +91,43 @@ public class TaskService {
         return toDto(saved);
 
     }
+    //zoradenie podla terminu vzostupne
+    public List<TaskDto> findAllSortedByDeadLine() {
+        return toDtoList(taskRepository.findAllByOrderByMustBeDoneAsc());
+    }
 
+
+    public List<TaskDto> findAllSortedByPriority(){
+        List<TaskDto> taskDtos = toDtoList(taskRepository.findAll());
+        taskDtos.sort(Comparator.comparing(TaskDto::priority).reversed());  // List vieme sortovat, Comparatorovi povieme co chceme sortovat
+                                                                            // TaskDto::priority -> toto je cesta k tomu co sortovat [to iste ako getPriority] a
+                                                                            //reversed ze od najvacsieho po najmensi
+        return taskDtos;
+    }
+
+    public List<TaskDto> findByStatus(Status status){
+        return toDtoList(taskRepository.findByStatus(status));
+    }
 
 
     public List<TaskDto>findAllTaskList(){
-        Iterable<Task> tasks = taskRepository.findAll();
-        List<TaskDto>taskDtos = new LinkedList<>();
-
-        for(Task task : tasks){
-            taskDtos.add(toDto(task)
-            );
-        }
-        return taskDtos;
+        return toDtoList(taskRepository.findAll());
     }
 
     public List<TaskDto>findUserTasks(String username){
         User user = userRepository.findByUsername(username)
                 .orElseThrow(()-> new NotFoundException("User not found."));
-        List<TaskDto> taskDtos = new LinkedList<>();
-
-        List<Task>tasks = user.getTaskList();
-
-        for(Task task : tasks){
-            taskDtos.add(toDto(task));
-        }
-        return taskDtos;
-
-
+        return toDtoList(user.getTaskList());
     }
 
     //metoda vracia ulohy domacnosti podla id
     public List<TaskDto>findHouseholdTasks(Long householdId){
-        List<Task> tasks = taskRepository.findByHouseholdId(householdId);
-        List<TaskDto> taskDtos = new LinkedList<>();
-
-        for (Task task : tasks){
-            taskDtos.add(toDto(task));
-        }
-        return taskDtos;
+        return toDtoList(taskRepository.findByHouseholdId(householdId));
     }
 
-
+/*
+    POMOCNE METODY
+ */
     //return new TaskDto
     private TaskDto toDto(Task task){
         return new TaskDto(
@@ -143,6 +140,15 @@ public class TaskService {
                 task.getPriority(),
                 task.getStatus()
         );
+    }
+
+    private List<TaskDto> toDtoList(Iterable<Task> tasks){
+        List<TaskDto> taskDtos = new LinkedList<>();
+        for (Task task : tasks){
+            taskDtos.add(toDto(task)
+            );
+        }
+        return taskDtos;
     }
 
 }
