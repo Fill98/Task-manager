@@ -3,6 +3,7 @@ package com.example.taskmaneger.service;
 import com.example.taskmaneger.dtos.taskdto.CreateTaskDto;
 import com.example.taskmaneger.dtos.taskdto.ModifyTaskDto;
 import com.example.taskmaneger.dtos.taskdto.TaskDto;
+import com.example.taskmaneger.exception.ForbiddenException;
 import com.example.taskmaneger.exception.NotFoundException;
 import com.example.taskmaneger.persistence.entity.Household;
 import com.example.taskmaneger.persistence.entity.Status;
@@ -129,6 +130,19 @@ public class TaskService {
 
     //metoda vracia ulohy domacnosti podla id
     public List<TaskDto>findHouseholdTasks(Long householdId){
+        Household household = householdRepository.findById(householdId)
+                .orElseThrow(()-> new NotFoundException("Household not found."));
+
+        User currentUser = getCurrentUser();
+
+        boolean hasAcces = household.getOwner().getId().equals(currentUser.getId())
+                || household.getMembers().stream()
+                .anyMatch(m -> m.getId().equals(currentUser.getId()));
+
+        if(!hasAcces){
+            throw new ForbiddenException("Member is not in Household.");
+        }
+
         return toDtoList(taskRepository.findByHouseholdId(householdId));
     }
 
