@@ -7,7 +7,7 @@ import org.springframework.data.repository.CrudRepository;
 import java.util.List;
 
 public interface TaskRepository extends CrudRepository<Task, Long> {
-    //pomocna metoda na hladanie uloh podls domacnosti
+    //pomocna metoda na hladanie uloh podla domacnosti
     List<Task> findByHouseholdId(Long householdId);
     //zoradenie podla teminu
     List<Task> findAllByOrderByMustBeDoneAsc();
