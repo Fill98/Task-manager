@@ -5,6 +5,7 @@ import com.example.taskmaneger.dtos.taskdto.ModifyTaskDto;
 import com.example.taskmaneger.dtos.taskdto.TaskDto;
 import com.example.taskmaneger.persistence.entity.Status;
 import com.example.taskmaneger.service.TaskService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +18,7 @@ public class TaskController {
     TaskService taskService;
 
     @PostMapping("/api/task")
-    public TaskDto createTask(@RequestBody CreateTaskDto createTaskDto){
+    public TaskDto createTask(@Valid @RequestBody CreateTaskDto createTaskDto){
         return taskService.createTask(createTaskDto);
     }
 
