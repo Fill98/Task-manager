@@ -99,14 +99,14 @@ public class TaskService {
         return taskDtos;
     }
 
+    //zoradenie podla priority (HIGH -> MEDIUM -> LOW), pri zhode podla najblizsieho terminu
     public List<TaskDto> findAllSortedByPriority(){
         List<TaskDto> taskDtos = toDtoList(getCurrentUser().getTaskList());
-        taskDtos.sort(Comparator.comparing(TaskDto::priority).reversed());  // List vieme sortovat, Comparatorovi povieme co chceme sortovat
-                                                                            // TaskDto::priority -> toto je cesta k tomu co sortovat [to iste ako getPriority] a
-                                                                            //reversed ze od najvacsieho po najmensi
+        taskDtos.sort(Comparator.comparing(TaskDto::priority).reversed()
+                .thenComparing(TaskDto::mustBeDone));
         return taskDtos;
     }
-
+    //filtrovanie podla statusu a sekundarne podla terminu
     public List<TaskDto> findByStatus(Status status){
         List<Task> filteredTasks = getCurrentUser()
                 .getTaskList()
