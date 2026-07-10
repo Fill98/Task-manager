@@ -3,6 +3,7 @@ package com.example.taskmaneger.service;
 import com.example.taskmaneger.dtos.taskdto.CreateTaskDto;
 import com.example.taskmaneger.dtos.taskdto.ModifyTaskDto;
 import com.example.taskmaneger.dtos.taskdto.TaskDto;
+import com.example.taskmaneger.exception.ConflictException;
 import com.example.taskmaneger.exception.ForbiddenException;
 import com.example.taskmaneger.exception.NotFoundException;
 import com.example.taskmaneger.persistence.entity.Household;
@@ -39,11 +40,19 @@ public class TaskService {
     public TaskDto createTask(CreateTaskDto createTaskDto){
         User user = userRepository.findById(createTaskDto.userId())
                 .orElseThrow(() -> new NotFoundException("User not found."));
-        User assignedBy = userRepository.findById(createTaskDto.assignedById())
-                .orElseThrow(() -> new NotFoundException("Assigned user not found"));
+        User assignedBy = currentUserService.getCurrentUser();
+
                 //pridanie tasku k domacnosti
-                Household household = householdRepository.findById(createTaskDto.householdId())
-                        .orElseThrow(() -> new NotFoundException("Household not found."));
+        Household household = householdRepository.findById(createTaskDto.householdId())
+                .orElseThrow(() -> new NotFoundException("Household not found."));
+        //Clen domacnosti vie pridelit ulohu lne clenovy domacnsoti
+        if(!household.hasMember(assignedBy)){
+            throw new ForbiddenException("You are not a member of this household.");
+        }
+        if(!household.hasMember(user)){
+            throw new ConflictException("User is not a member of this household.");
+        }
+
 
         Task task = new Task();
         task.setTaskName(createTaskDto.taskName());
@@ -63,15 +72,15 @@ public class TaskService {
     public void changeStatus(Long id, Status status){
         Task task = taskRepository.findById(id)
                 .orElseThrow(()-> new NotFoundException("Task not found"));
+        verifyCanModify(task,currentUserService.getCurrentUser());
         task.setStatus(status);
         taskRepository.save(task);
     }
 
     public void deleteTask(Long id){
-
         Task task = taskRepository.findById(id).
                 orElseThrow(()-> new NotFoundException("This task doesn't exist."));
-
+        verifyCanModify(task,currentUserService.getCurrentUser());
         taskRepository.deleteById(id);
     }
 
@@ -82,6 +91,9 @@ public class TaskService {
 
         Task task = taskRepository.findById(id)
                 .orElseThrow(()-> new NotFoundException("Task not found"));
+
+        verifyCanModify(task,currentUserService.getCurrentUser());
+
         task.setTaskName(newTask.taskName());
         task.setDescription(newTask.description());
         task.setUser(user);
@@ -109,7 +121,7 @@ public class TaskService {
 
         List<TaskDto> taskDtos = toDtoList(user.getTaskList());
         taskDtos.sort(Comparator.comparing(TaskDto::priority).reversed()
-                .thenComparing(TaskDto::mustBeDone));
+                .thenComparing(TaskDto::mustBeDone,Comparator.nullsLast(Comparator.naturalOrder())));
         return taskDtos;
     }
     //filtrovanie podla statusu a sekundarne podla terminu
@@ -144,9 +156,7 @@ public class TaskService {
 
         User currentUser = currentUserService.getCurrentUser();
 
-        boolean hasAcces = household.getOwner().getId().equals(currentUser.getId())
-                || household.getMembers().stream()
-                .anyMatch(m -> m.getId().equals(currentUser.getId()));
+        boolean hasAcces = household.hasMember(currentUser);
 
         if(!hasAcces){
             throw new ForbiddenException("Member is not in Household.");
@@ -181,6 +191,16 @@ public class TaskService {
         }
         return taskDtos;
     }
+
+    private void verifyCanModify(Task task, User user){
+        boolean isCreator = user.getId().equals(task.getAssignedBy().getId());
+        boolean isOwner = task.getHousehold().getOwner().getId().equals(user.getId());
+
+        if(!isCreator && !isOwner){
+            throw new ForbiddenException("You are not allowed to modify this task.");
+        }
+    }
+
 
 
 }
