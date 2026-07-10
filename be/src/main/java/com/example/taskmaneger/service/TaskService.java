@@ -12,8 +12,8 @@ import com.example.taskmaneger.persistence.entity.User;
 import com.example.taskmaneger.persistence.repository.HouseholdRepository;
 import com.example.taskmaneger.persistence.repository.TaskRepository;
 import com.example.taskmaneger.persistence.repository.UserRepository;
+import com.example.taskmaneger.security.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -31,6 +31,9 @@ public class TaskService {
 
     @Autowired
     private HouseholdRepository householdRepository;
+
+    @Autowired
+    private CurrentUserService currentUserService;
 
 
     public TaskDto createTask(CreateTaskDto createTaskDto){
@@ -93,7 +96,8 @@ public class TaskService {
 
     //zoradenie podla terminu vzostupne
     public List<TaskDto> findAllSortedByDeadLine() {
-        List<TaskDto> taskDtos = toDtoList(getCurrentUser().getTaskList());
+        User user = currentUserService.getCurrentUser();
+        List<TaskDto> taskDtos = toDtoList(user.getTaskList());
         taskDtos.sort(Comparator.comparing(TaskDto::mustBeDone,Comparator.nullsLast(Comparator.naturalOrder())));
 
         return taskDtos;
@@ -101,14 +105,18 @@ public class TaskService {
 
     //zoradenie podla priority (HIGH -> MEDIUM -> LOW), pri zhode podla najblizsieho terminu
     public List<TaskDto> findAllSortedByPriority(){
-        List<TaskDto> taskDtos = toDtoList(getCurrentUser().getTaskList());
+        User user = currentUserService.getCurrentUser();
+
+        List<TaskDto> taskDtos = toDtoList(user.getTaskList());
         taskDtos.sort(Comparator.comparing(TaskDto::priority).reversed()
                 .thenComparing(TaskDto::mustBeDone));
         return taskDtos;
     }
     //filtrovanie podla statusu a sekundarne podla terminu
     public List<TaskDto> findByStatus(Status status){
-        List<Task> filteredTasks = getCurrentUser()
+        User user = currentUserService.getCurrentUser();
+
+        List<Task> filteredTasks = user
                 .getTaskList()
                 .stream() // pomocou stream sa daju retazit oepracie
                 .filter(task -> task.getStatus() == status)// vyberie tie tasky ktore splnaju podmienku
@@ -124,7 +132,8 @@ public class TaskService {
     }
 
     public List<TaskDto>findUserTasks(){
-        User user = getCurrentUser();
+
+        User user = currentUserService.getCurrentUser();
         return toDtoList(user.getTaskList());
     }
 
@@ -133,7 +142,7 @@ public class TaskService {
         Household household = householdRepository.findById(householdId)
                 .orElseThrow(()-> new NotFoundException("Household not found."));
 
-        User currentUser = getCurrentUser();
+        User currentUser = currentUserService.getCurrentUser();
 
         boolean hasAcces = household.getOwner().getId().equals(currentUser.getId())
                 || household.getMembers().stream()
@@ -173,12 +182,5 @@ public class TaskService {
         return taskDtos;
     }
 
-    private User getCurrentUser(){
-        String username = SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getName();
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new NotFoundException("User not found."));
-    }
 
 }
