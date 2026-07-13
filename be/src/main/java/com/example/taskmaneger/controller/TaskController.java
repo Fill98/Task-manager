@@ -24,7 +24,7 @@ public class TaskController {
 
     //modifikovanie tasku
     @PutMapping("/api/task/{id}")
-    public TaskDto modifyTask(@PathVariable Long id, @RequestBody ModifyTaskDto modifyTaskDto){
+    public TaskDto modifyTask(@PathVariable Long id,@Valid @RequestBody ModifyTaskDto modifyTaskDto){
         return taskService.modifyTask(id,modifyTaskDto);
     }
 
