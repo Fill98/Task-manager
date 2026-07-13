@@ -3,11 +3,13 @@ package com.example.taskmaneger.service;
 import com.example.taskmaneger.dtos.householddto.CreateHouseholdDto;
 import com.example.taskmaneger.dtos.householddto.HouseholdDto;
 import com.example.taskmaneger.exception.ConflictException;
+import com.example.taskmaneger.exception.ForbiddenException;
 import com.example.taskmaneger.exception.NotFoundException;
 import com.example.taskmaneger.persistence.entity.Household;
 import com.example.taskmaneger.persistence.entity.User;
 import com.example.taskmaneger.persistence.repository.HouseholdRepository;
 import com.example.taskmaneger.persistence.repository.UserRepository;
+import com.example.taskmaneger.security.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,20 +22,20 @@ public class HouseholdService {
     private HouseholdRepository householdRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private CurrentUserService currentUserService;
 
     //metoda na vytvorenie domacnosti
     public HouseholdDto createHousehold(CreateHouseholdDto createHouseholdDto){
-        Household household = new Household();
-        household.setName(createHouseholdDto.name());
-
-        User owner =
-                userRepository.findById(createHouseholdDto.ownerId())
-                .orElseThrow(() -> new NotFoundException("Owner not found."));
+        User owner = currentUserService.getCurrentUser();
 
         //overenie ci user uz neni clenom/ownerom inej domacnosti
         if (householdRepository.existsByMembers_Id(owner.getId())){
             throw new ConflictException("User is already a member of a household.");
         }
+
+        Household household = new Household();
+        household.setName(createHouseholdDto.name());
 
         household.setOwner(owner);
         //vytvarame prazdny list clenov domacnosti
@@ -54,8 +56,13 @@ public class HouseholdService {
     }
     //pridanie clena domacnosti
     public HouseholdDto addMember(Long householdId, Long userId){
+        User user = currentUserService.getCurrentUser();
+
         Household household = householdRepository.findById(householdId)
                 .orElseThrow(() -> new NotFoundException("Household not found."));
+        if(!user.getId().equals(household.getOwner().getId())){
+            throw new ForbiddenException("You are not an owner of the household.");
+        }
         User newMember = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found."));
 
@@ -76,10 +83,18 @@ public class HouseholdService {
 
 
     //metoda na odstranenie clena domacnosti(userom samim alebo ownerom domacnosti)
-    //TODO: treba doprogramovat overenie prihlaseneho usera
     public void removeMember(Long householdId, Long userId){
         Household household = householdRepository.findById(householdId)
                 .orElseThrow(() -> new NotFoundException("Household not found."));
+
+        User user = currentUserService.getCurrentUser();
+        boolean isOwner = household.getOwner().getId().equals(user.getId());
+        boolean removingSelf = user.getId().equals(userId);
+
+        if(!isOwner && !removingSelf){
+            throw new ForbiddenException("You can only remove yourself, or owner can remove members");
+        }
+
         household.getMembers().removeIf(member -> member.getId().equals(userId));
         householdRepository.save(household);
     }

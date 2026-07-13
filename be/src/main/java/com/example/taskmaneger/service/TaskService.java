@@ -3,6 +3,7 @@ package com.example.taskmaneger.service;
 import com.example.taskmaneger.dtos.taskdto.CreateTaskDto;
 import com.example.taskmaneger.dtos.taskdto.ModifyTaskDto;
 import com.example.taskmaneger.dtos.taskdto.TaskDto;
+import com.example.taskmaneger.exception.ConflictException;
 import com.example.taskmaneger.exception.ForbiddenException;
 import com.example.taskmaneger.exception.NotFoundException;
 import com.example.taskmaneger.persistence.entity.Household;
@@ -12,8 +13,8 @@ import com.example.taskmaneger.persistence.entity.User;
 import com.example.taskmaneger.persistence.repository.HouseholdRepository;
 import com.example.taskmaneger.persistence.repository.TaskRepository;
 import com.example.taskmaneger.persistence.repository.UserRepository;
+import com.example.taskmaneger.security.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -32,15 +33,26 @@ public class TaskService {
     @Autowired
     private HouseholdRepository householdRepository;
 
+    @Autowired
+    private CurrentUserService currentUserService;
+
 
     public TaskDto createTask(CreateTaskDto createTaskDto){
         User user = userRepository.findById(createTaskDto.userId())
                 .orElseThrow(() -> new NotFoundException("User not found."));
-        User assignedBy = userRepository.findById(createTaskDto.assignedById())
-                .orElseThrow(() -> new NotFoundException("Assigned user not found"));
+        User assignedBy = currentUserService.getCurrentUser();
+
                 //pridanie tasku k domacnosti
-                Household household = householdRepository.findById(createTaskDto.householdId())
-                        .orElseThrow(() -> new NotFoundException("Household not found."));
+        Household household = householdRepository.findById(createTaskDto.householdId())
+                .orElseThrow(() -> new NotFoundException("Household not found."));
+        //Clen domacnosti vie pridelit ulohu lne clenovy domacnsoti
+        if(!household.hasMember(assignedBy)){
+            throw new ForbiddenException("You are not a member of this household.");
+        }
+        if(!household.hasMember(user)){
+            throw new ConflictException("User is not a member of this household.");
+        }
+
 
         Task task = new Task();
         task.setTaskName(createTaskDto.taskName());
@@ -60,15 +72,22 @@ public class TaskService {
     public void changeStatus(Long id, Status status){
         Task task = taskRepository.findById(id)
                 .orElseThrow(()-> new NotFoundException("Task not found"));
+        User user = currentUserService.getCurrentUser();
+
+        boolean isAssignee = task.getUser().getId().equals(user.getId());
+
+        if(!isAssignee){
+            throw new ForbiddenException("You cannot change status of this task.");
+        }
+
         task.setStatus(status);
         taskRepository.save(task);
     }
 
     public void deleteTask(Long id){
-
         Task task = taskRepository.findById(id).
                 orElseThrow(()-> new NotFoundException("This task doesn't exist."));
-
+        verifyCanModify(task,currentUserService.getCurrentUser());
         taskRepository.deleteById(id);
     }
 
@@ -79,6 +98,9 @@ public class TaskService {
 
         Task task = taskRepository.findById(id)
                 .orElseThrow(()-> new NotFoundException("Task not found"));
+
+        verifyCanModify(task,currentUserService.getCurrentUser());
+
         task.setTaskName(newTask.taskName());
         task.setDescription(newTask.description());
         task.setUser(user);
@@ -93,7 +115,8 @@ public class TaskService {
 
     //zoradenie podla terminu vzostupne
     public List<TaskDto> findAllSortedByDeadLine() {
-        List<TaskDto> taskDtos = toDtoList(getCurrentUser().getTaskList());
+        User user = currentUserService.getCurrentUser();
+        List<TaskDto> taskDtos = toDtoList(user.getTaskList());
         taskDtos.sort(Comparator.comparing(TaskDto::mustBeDone,Comparator.nullsLast(Comparator.naturalOrder())));
 
         return taskDtos;
@@ -101,14 +124,18 @@ public class TaskService {
 
     //zoradenie podla priority (HIGH -> MEDIUM -> LOW), pri zhode podla najblizsieho terminu
     public List<TaskDto> findAllSortedByPriority(){
-        List<TaskDto> taskDtos = toDtoList(getCurrentUser().getTaskList());
+        User user = currentUserService.getCurrentUser();
+
+        List<TaskDto> taskDtos = toDtoList(user.getTaskList());
         taskDtos.sort(Comparator.comparing(TaskDto::priority).reversed()
-                .thenComparing(TaskDto::mustBeDone));
+                .thenComparing(TaskDto::mustBeDone,Comparator.nullsLast(Comparator.naturalOrder())));
         return taskDtos;
     }
     //filtrovanie podla statusu a sekundarne podla terminu
     public List<TaskDto> findByStatus(Status status){
-        List<Task> filteredTasks = getCurrentUser()
+        User user = currentUserService.getCurrentUser();
+
+        List<Task> filteredTasks = user
                 .getTaskList()
                 .stream() // pomocou stream sa daju retazit oepracie
                 .filter(task -> task.getStatus() == status)// vyberie tie tasky ktore splnaju podmienku
@@ -124,7 +151,8 @@ public class TaskService {
     }
 
     public List<TaskDto>findUserTasks(){
-        User user = getCurrentUser();
+
+        User user = currentUserService.getCurrentUser();
         return toDtoList(user.getTaskList());
     }
 
@@ -133,11 +161,9 @@ public class TaskService {
         Household household = householdRepository.findById(householdId)
                 .orElseThrow(()-> new NotFoundException("Household not found."));
 
-        User currentUser = getCurrentUser();
+        User currentUser = currentUserService.getCurrentUser();
 
-        boolean hasAcces = household.getOwner().getId().equals(currentUser.getId())
-                || household.getMembers().stream()
-                .anyMatch(m -> m.getId().equals(currentUser.getId()));
+        boolean hasAcces = household.hasMember(currentUser);
 
         if(!hasAcces){
             throw new ForbiddenException("Member is not in Household.");
@@ -173,12 +199,14 @@ public class TaskService {
         return taskDtos;
     }
 
-    private User getCurrentUser(){
-        String username = SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getName();
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new NotFoundException("User not found."));
+    private void verifyCanModify(Task task, User user){
+        boolean isCreator = user.getId().equals(task.getAssignedBy().getId());
+
+        if(!isCreator){
+            throw new ForbiddenException("You are not allowed to modify this task.");
+        }
     }
+
+
 
 }

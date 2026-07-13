@@ -3,9 +3,11 @@ package com.example.taskmaneger.service;
 import com.example.taskmaneger.dtos.userdto.CreateUserDto;
 import com.example.taskmaneger.dtos.userdto.UserDto;
 import com.example.taskmaneger.exception.ConflictException;
+import com.example.taskmaneger.exception.ForbiddenException;
 import com.example.taskmaneger.exception.NotFoundException;
 import com.example.taskmaneger.persistence.entity.User;
 import com.example.taskmaneger.persistence.repository.UserRepository;
+import com.example.taskmaneger.security.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,8 @@ public class UserService {
     private UserRepository userRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private CurrentUserService currentUserService;
 
 
     public UserDto createUser(CreateUserDto createUserDto){
@@ -32,7 +36,13 @@ public class UserService {
     }
 
     public void deleteUser(long id){
-        userRepository.deleteById(id);
+        User user = currentUserService.getCurrentUser();
+
+        if(user.getId() == id) {
+            userRepository.deleteById(id);
+        }else{
+            throw new ForbiddenException("You cannot delete another user.");
+        }
     }
     //TODO modify user
 

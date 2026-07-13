@@ -30,4 +30,9 @@ public class Household {
     @JoinColumn(name = "household_id")
     private List<User> members;
 
+
+    public boolean hasMember(User user){
+        return members.stream()
+                .anyMatch(m -> m.getId().equals(user.getId()));
+    }
 }
