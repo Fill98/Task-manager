@@ -74,10 +74,9 @@ public class TaskService {
                 .orElseThrow(()-> new NotFoundException("Task not found"));
         User user = currentUserService.getCurrentUser();
 
-        boolean isCreator = task.getAssignedBy().getId().equals(user.getId());
         boolean isAssignee = task.getUser().getId().equals(user.getId());
 
-        if(!isCreator && !isAssignee){
+        if(!isAssignee){
             throw new ForbiddenException("You cannot change status of this task.");
         }
 
