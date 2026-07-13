@@ -72,7 +72,15 @@ public class TaskService {
     public void changeStatus(Long id, Status status){
         Task task = taskRepository.findById(id)
                 .orElseThrow(()-> new NotFoundException("Task not found"));
-        verifyCanModify(task,currentUserService.getCurrentUser());
+        User user = currentUserService.getCurrentUser();
+
+        boolean isCreator = task.getAssignedBy().getId().equals(user.getId());
+        boolean isAssignee = task.getUser().getId().equals(user.getId());
+
+        if(!isCreator && !isAssignee){
+            throw new ForbiddenException("You cannot change status of this task.");
+        }
+
         task.setStatus(status);
         taskRepository.save(task);
     }
@@ -194,9 +202,8 @@ public class TaskService {
 
     private void verifyCanModify(Task task, User user){
         boolean isCreator = user.getId().equals(task.getAssignedBy().getId());
-        boolean isOwner = task.getHousehold().getOwner().getId().equals(user.getId());
 
-        if(!isCreator && !isOwner){
+        if(!isCreator){
             throw new ForbiddenException("You are not allowed to modify this task.");
         }
     }
