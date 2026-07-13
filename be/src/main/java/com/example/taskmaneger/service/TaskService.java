@@ -1,9 +1,6 @@
 package com.example.taskmaneger.service;
 
-import com.example.taskmaneger.dtos.taskdto.CreatePersonalTaskDto;
-import com.example.taskmaneger.dtos.taskdto.CreateTaskDto;
-import com.example.taskmaneger.dtos.taskdto.ModifyTaskDto;
-import com.example.taskmaneger.dtos.taskdto.TaskDto;
+import com.example.taskmaneger.dtos.taskdto.*;
 import com.example.taskmaneger.exception.ConflictException;
 import com.example.taskmaneger.exception.ForbiddenException;
 import com.example.taskmaneger.exception.NotFoundException;
@@ -179,10 +176,12 @@ public class TaskService {
 
     public TaskDto createPersonalTask(CreatePersonalTaskDto createPersonalTaskDto){
         Task task = new Task();
+        User user = currentUserService.getCurrentUser();
+
         task.setTaskName(createPersonalTaskDto.taskName());
         task.setDescription(createPersonalTaskDto.description());
-        task.setUser(currentUserService.getCurrentUser());
-        task.setAssignedBy(currentUserService.getCurrentUser());
+        task.setUser(user);
+        task.setAssignedBy(user);
         task.setHousehold(null);
         task.setMustBeDone(createPersonalTaskDto.mustBeDone());
         task.setPriority(createPersonalTaskDto.priority());
@@ -191,6 +190,19 @@ public class TaskService {
         return toDto(taskRepository.save(task));
     }
 
+    public TaskDto modifyPersonalTask(Long id,ModifyPersonalTaskDto taskDto){
+        Task task = taskRepository.findById(id)
+                .orElseThrow(()-> new NotFoundException("Task not found."));
+        verifyCanModify(task, currentUserService.getCurrentUser());
+
+        task.setTaskName(taskDto.taskName());
+        task.setDescription(taskDto.description());
+        task.setMustBeDone(taskDto.mustBeDone());
+        task.setPriority(taskDto.priority());
+
+        return toDto(taskRepository.save(task));
+
+    }
 
 /*
     POMOCNE METODY
