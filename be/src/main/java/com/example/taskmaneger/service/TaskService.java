@@ -97,6 +97,10 @@ public class TaskService {
         Task task = taskRepository.findById(id)
                 .orElseThrow(()-> new NotFoundException("Task not found"));
 
+        if(task.getHousehold() == null){
+            throw new ConflictException("This is not a household task.");
+        }
+
         verifyCanModify(task,currentUserService.getCurrentUser());
 
         task.setTaskName(newTask.taskName());
@@ -193,6 +197,10 @@ public class TaskService {
     public TaskDto modifyPersonalTask(Long id,ModifyPersonalTaskDto taskDto){
         Task task = taskRepository.findById(id)
                 .orElseThrow(()-> new NotFoundException("Task not found."));
+
+        if(task.getHousehold() != null){
+            throw new ConflictException("This is not a personal task.");
+        }
         verifyCanModify(task, currentUserService.getCurrentUser());
 
         task.setTaskName(taskDto.taskName());
