@@ -1,5 +1,6 @@
 package com.example.taskmaneger.controller;
 
+import com.example.taskmaneger.dtos.taskdto.CreatePersonalTaskDto;
 import com.example.taskmaneger.dtos.taskdto.CreateTaskDto;
 import com.example.taskmaneger.dtos.taskdto.ModifyTaskDto;
 import com.example.taskmaneger.dtos.taskdto.TaskDto;
@@ -73,4 +74,14 @@ public class TaskController {
     public List<TaskDto> findHouseholdTasks(@PathVariable Long householdId){
         return taskService.findHouseholdTasks(householdId);
     }
+
+
+    //Personalne Tasky
+
+    @PostMapping("/api/personal/task")
+    public TaskDto createPersonalTask(@Valid @RequestBody CreatePersonalTaskDto createPersonalTaskDto){
+        return taskService.createPersonalTask(createPersonalTaskDto);
+    }
+
+
 }

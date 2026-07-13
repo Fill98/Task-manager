@@ -1,5 +1,6 @@
 package com.example.taskmaneger.service;
 
+import com.example.taskmaneger.dtos.taskdto.CreatePersonalTaskDto;
 import com.example.taskmaneger.dtos.taskdto.CreateTaskDto;
 import com.example.taskmaneger.dtos.taskdto.ModifyTaskDto;
 import com.example.taskmaneger.dtos.taskdto.TaskDto;
@@ -171,6 +172,25 @@ public class TaskService {
 
         return toDtoList(taskRepository.findByHouseholdId(householdId));
     }
+
+    /*
+    Perosnalne tasky
+     */
+
+    public TaskDto createPersonalTask(CreatePersonalTaskDto createPersonalTaskDto){
+        Task task = new Task();
+        task.setTaskName(createPersonalTaskDto.taskName());
+        task.setDescription(createPersonalTaskDto.description());
+        task.setUser(currentUserService.getCurrentUser());
+        task.setAssignedBy(currentUserService.getCurrentUser());
+        task.setHousehold(null);
+        task.setMustBeDone(createPersonalTaskDto.mustBeDone());
+        task.setPriority(createPersonalTaskDto.priority());
+        task.setStatus(Status.TODO);
+
+        return toDto(taskRepository.save(task));
+    }
+
 
 /*
     POMOCNE METODY
