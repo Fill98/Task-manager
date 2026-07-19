@@ -103,6 +103,11 @@ public class TaskService {
 
         verifyCanModify(task,currentUserService.getCurrentUser());
 
+        //novy user musi byt clen domacnosti ked mu zadavame ulohu
+        if(!task.getHousehold().hasMember(user)){
+            throw new ConflictException("User is not a member of this household.");
+        }
+
         task.setTaskName(newTask.taskName());
         task.setDescription(newTask.description());
         task.setUser(user);
