@@ -1,8 +1,6 @@
 package com.example.taskmaneger.service;
 
-import com.example.taskmaneger.dtos.taskdto.CreateTaskDto;
-import com.example.taskmaneger.dtos.taskdto.ModifyTaskDto;
-import com.example.taskmaneger.dtos.taskdto.TaskDto;
+import com.example.taskmaneger.dtos.taskdto.*;
 import com.example.taskmaneger.exception.ConflictException;
 import com.example.taskmaneger.exception.ForbiddenException;
 import com.example.taskmaneger.exception.NotFoundException;
@@ -99,7 +97,16 @@ public class TaskService {
         Task task = taskRepository.findById(id)
                 .orElseThrow(()-> new NotFoundException("Task not found"));
 
+        if(task.getHousehold() == null){
+            throw new ConflictException("This is not a household task.");
+        }
+
         verifyCanModify(task,currentUserService.getCurrentUser());
+
+        //novy user musi byt clen domacnosti ked mu zadavame ulohu
+        if(!task.getHousehold().hasMember(user)){
+            throw new ConflictException("User is not a member of this household.");
+        }
 
         task.setTaskName(newTask.taskName());
         task.setDescription(newTask.description());
@@ -170,6 +177,44 @@ public class TaskService {
         }
 
         return toDtoList(taskRepository.findByHouseholdId(householdId));
+    }
+
+    /*
+    Perosnalne tasky
+     */
+
+    public TaskDto createPersonalTask(CreatePersonalTaskDto createPersonalTaskDto){
+        Task task = new Task();
+        User user = currentUserService.getCurrentUser();
+
+        task.setTaskName(createPersonalTaskDto.taskName());
+        task.setDescription(createPersonalTaskDto.description());
+        task.setUser(user);
+        task.setAssignedBy(user);
+        task.setHousehold(null);
+        task.setMustBeDone(createPersonalTaskDto.mustBeDone());
+        task.setPriority(createPersonalTaskDto.priority());
+        task.setStatus(Status.TODO);
+
+        return toDto(taskRepository.save(task));
+    }
+
+    public TaskDto modifyPersonalTask(Long id,ModifyPersonalTaskDto taskDto){
+        Task task = taskRepository.findById(id)
+                .orElseThrow(()-> new NotFoundException("Task not found."));
+
+        if(task.getHousehold() != null){
+            throw new ConflictException("This is not a personal task.");
+        }
+        verifyCanModify(task, currentUserService.getCurrentUser());
+
+        task.setTaskName(taskDto.taskName());
+        task.setDescription(taskDto.description());
+        task.setMustBeDone(taskDto.mustBeDone());
+        task.setPriority(taskDto.priority());
+
+        return toDto(taskRepository.save(task));
+
     }
 
 /*

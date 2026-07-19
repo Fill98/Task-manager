@@ -1,8 +1,6 @@
 package com.example.taskmaneger.controller;
 
-import com.example.taskmaneger.dtos.taskdto.CreateTaskDto;
-import com.example.taskmaneger.dtos.taskdto.ModifyTaskDto;
-import com.example.taskmaneger.dtos.taskdto.TaskDto;
+import com.example.taskmaneger.dtos.taskdto.*;
 import com.example.taskmaneger.persistence.entity.Status;
 import com.example.taskmaneger.service.TaskService;
 import jakarta.validation.Valid;
@@ -24,7 +22,7 @@ public class TaskController {
 
     //modifikovanie tasku
     @PutMapping("/api/task/{id}")
-    public TaskDto modifyTask(@PathVariable Long id, @RequestBody ModifyTaskDto modifyTaskDto){
+    public TaskDto modifyTask(@PathVariable Long id,@Valid @RequestBody ModifyTaskDto modifyTaskDto){
         return taskService.modifyTask(id,modifyTaskDto);
     }
 
@@ -73,4 +71,19 @@ public class TaskController {
     public List<TaskDto> findHouseholdTasks(@PathVariable Long householdId){
         return taskService.findHouseholdTasks(householdId);
     }
+
+
+    //Personalne Tasky
+
+    @PostMapping("/api/task/personal")
+    public TaskDto createPersonalTask(@Valid @RequestBody CreatePersonalTaskDto createPersonalTaskDto){
+        return taskService.createPersonalTask(createPersonalTaskDto);
+    }
+
+    @PutMapping("/api/task/personal/{id}")
+    public TaskDto modifyPersonalTask(@PathVariable Long id, @Valid @RequestBody ModifyPersonalTaskDto dto){
+        return taskService.modifyPersonalTask(id, dto);
+    }
+
+
 }
