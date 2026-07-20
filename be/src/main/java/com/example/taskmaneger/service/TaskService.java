@@ -194,6 +194,15 @@ public class TaskService {
         return toDto(taskRepository.save(task));
     }
 
+    public List<TaskDto> findPersonalTasks(){
+        User user = currentUserService.getCurrentUser();
+        List<Task> personalTasks = user.getTaskList()
+                .stream()
+                .filter(task -> task.getHousehold() == null)
+                .toList();
+        return  toDtoList(personalTasks);
+    }
+
     public TaskDto modifyPersonalTask(Long id,ModifyPersonalTaskDto taskDto){
         Task task = taskRepository.findById(id)
                 .orElseThrow(()-> new NotFoundException("Task not found."));

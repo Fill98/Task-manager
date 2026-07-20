@@ -61,6 +61,7 @@ public class TaskController {
         return taskService.findByStatus(status);
     }
 
+    //Vracia ulohy priradene z domacnosti a aj personalne
     @GetMapping("/api/task/mytasks")
     public List<TaskDto> findUserTasks(){
         return taskService.findUserTasks();
@@ -83,6 +84,12 @@ public class TaskController {
     @PutMapping("/api/task/personal/{id}")
     public TaskDto modifyPersonalTask(@PathVariable Long id, @Valid @RequestBody ModifyPersonalTaskDto dto){
         return taskService.modifyPersonalTask(id, dto);
+    }
+
+    //vracia personalne tasky
+    @GetMapping("/api/task/personal")
+    public List<TaskDto> findPersonalTasks(){
+        return taskService.findPersonalTasks();
     }
 
 
